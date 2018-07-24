@@ -1,0 +1,13 @@
+{
+    "name": "hiqdev/catcher",
+    "type": "project",
+    "description": "Catcher",
+    "keywords": [
+        "catcher"
+    ],
+    "require-dev": {
+        "hiqdev/hidev-python": "<2.0 || dev-master",
+        "hiqdev/hidev-hiqdev": "<2.0 || dev-master"
+    },
+    "minimum-stability": "dev"
+}

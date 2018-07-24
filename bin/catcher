@@ -1,0 +1,13 @@
+#!/usr/bin/python -u
+
+# Message queue subscribing version based on RabbitMQ and pika.
+
+from heppy.Args import Args
+from heppy.Config import Config
+from heppy.Daemon import Daemon
+
+args = Args()
+config = Config(args.get('path'))
+config.merge(args)
+
+print "CATCHER"
