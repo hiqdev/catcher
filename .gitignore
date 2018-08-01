@@ -1,3 +1,10 @@
+# Packaging
 /composer.lock
 /vendor
 /src
+/catcher.egg-info
+
+# Byte-compiled / optimized / DLL files
+*$py.class
+*.py[cod]
+__pycache__/
