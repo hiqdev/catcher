@@ -1,0 +1,14 @@
+checks:
+    python:
+        code_rating: true
+        duplicate_code: true
+tools:
+    php_code_coverage:
+        enabled: true
+    external_code_coverage:
+        timeout: 600
+build:
+    nodes:
+        analysis:
+            tests:
+                override: [php-scrutinizer-run]
