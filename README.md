@@ -39,19 +39,19 @@
 {
     "facebook.com": {
         "since": "2018-08-01 01:01:01",
-        "price": 100
+        "weight": 100
     },
     "google.com": {
         "since": "2018-08-01 15:03:01",
-        "price": 200
+        "weight": 200
     },
     "yahoo.com": {
         "since": "3018-08-01 15:04:30",
-        "price": 900
+        "weight": 900
     },
     "example.com": {
         "since": "2018-08-01 15:03:01",
-        "price": 200,
+        "weight": 200,
         "taken-by": "regid"
     }
 }
