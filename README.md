@@ -4,6 +4,59 @@
 [![Scrutinizer Code Coverage](https://img.shields.io/scrutinizer/coverage/g/hiqdev/catcher.svg)](https://scrutinizer-ci.com/g/hiqdev/catcher/)
 [![Scrutinizer Code Quality](https://img.shields.io/scrutinizer/g/hiqdev/catcher.svg)](https://scrutinizer-ci.com/g/hiqdev/catcher/)
 
+## Use
+
+```sh
+./bin/catcher config.json start
+```
+
+## Main Configuration File
+
+```json
+{
+    "mainRefreshPeriod": {"minutes": 1},
+    "domainsCheckPeriod": {"minutes": 10},
+    "domainsReloadPeriod": {"minutes": 3},
+
+    "domainsFilePath": "etc/my-domains.json",
+
+    "epp": {
+        "host":         "epp.verisign-grs.com",
+        "port":         700,
+        "bind":         "1.2.3.4",
+        "login":        "mylogin",
+        "password":     "mypassword",
+        "certfile":     "ssl/my.com.cert",
+        "keyfile":      "ssl/my.com.key",
+        "ca_certs":     "ssl/my.com.intermediate"
+    }
+}
+```
+
+## Domains List File
+
+```json
+{
+    "facebook.com": {
+        "since": "2018-08-01 01:01:01",
+        "price": 100
+    },
+    "google.com": {
+        "since": "2018-08-01 15:03:01",
+        "price": 200
+    },
+    "yahoo.com": {
+        "since": "3018-08-01 15:04:30",
+        "price": 900
+    },
+    "example.com": {
+        "since": "2018-08-01 15:03:01",
+        "price": 200,
+        "taken-by": "regid"
+    }
+}
+```
+
 ## License
 
 This project is released under the terms of the BSD-3-Clause [license](LICENSE).
