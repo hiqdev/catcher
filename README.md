@@ -57,6 +57,13 @@
 }
 ```
 
+## How it works
+
+- Reads main configuration file
+- Reads domain list file (rereads periodically)
+- Sends as many `domain:register` commands as possible
+- Periodically checks domains list to mark already registered domains
+
 ## License
 
 This project is released under the terms of the BSD-3-Clause [license](LICENSE).
