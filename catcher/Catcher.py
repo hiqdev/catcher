@@ -23,34 +23,34 @@ class Catcher:
 
     def start(self):
         print "START"
-        self.reload_domains()
-        self.check_domains()
+        self._reload_domains()
+        self._check_domains()
         #self.daemon = Daemon(config)
         #self.daemon.start()
-        self.loop()
+        self._loop()
 
-    def loop(self):
+    def _loop(self):
         while True:
             time.sleep(0.5)
             print '  ' + self.random.random_key()
-            self.refresh()
+            self._refresh()
 
-    def refresh(self):
+    def _refresh(self):
         if datetime.now() < self.lastRefreshed + self.refreshPeriod:
             return
 
         print "- refresh"
         self.lastRefreshed = datetime.now()
-        self.refresh_stats()
+        self._refresh_stats()
         if self.lastRefreshed > self.domainsLastReloaded + self.domainsReloadPeriod:
-            self.reload_domains()
+            self._reload_domains()
         if self.lastRefreshed > self.domainsLastChecked + self.domainsCheckPeriod:
-            self.check_domains()
+            self._check_domains()
 
-    def refresh_stats(self):
+    def _refresh_stats(self):
         stats = Config(self.config['statsFilePath'])
 
-    def reload_domains(self):
+    def _reload_domains(self):
         alldoms = Config(self.config['domainsFilePath'])
 
         for domain in alldoms:
@@ -73,7 +73,7 @@ class Catcher:
         self.domainsLastReloaded = datetime.now()
         self.domainsReloadPeriod = timedelta(**self.config['domainsReloadPeriod'])
 
-    def check_domains(self):
+    def _check_domains(self):
         self.domainsLastChecked = datetime.now()
         self.domainsCheckPeriod = timedelta(**self.config['domainsCheckPeriod'])
         print "! DOMAINS CHECKED"
