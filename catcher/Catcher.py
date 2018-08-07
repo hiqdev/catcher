@@ -16,6 +16,13 @@ class Catcher:
         self.period = timedelta(**config['mainRefreshPeriod'])
         self.refreshed = datetime.now()
         self.domains = {}
+
+    def dump(self):
+        print "DUMP"
+        pprint(self.config)
+
+    def start(self):
+        print "START"
         self.reload_domains()
         self.check_domains()
 
