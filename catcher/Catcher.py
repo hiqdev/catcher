@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import time
+
 from datetime import timedelta
 from datetime import datetime
 
@@ -16,6 +17,7 @@ class Catcher:
         self.refreshPeriod = timedelta(**config['mainRefreshPeriod'])
         self.lastRefreshed = datetime.now()
         self.domains = {}
+        self.stats = None
 
     def dump(self):
         print "DUMP"
@@ -32,14 +34,19 @@ class Catcher:
     def _loop(self):
         while True:
             time.sleep(0.5)
-            print '  ' + self.random.random_key()
+            domain = self.random.random_key()
+            if 'count' in self.domains[domain]:
+                self.domains[domain]['count'] += 1
+            else:
+                self.domains[domain]['count'] = 1
+            #print '  %d %s' % (self.domains[domain]['count'], domain)
             self._refresh()
 
     def _refresh(self):
         if datetime.now() < self.lastRefreshed + self.refreshPeriod:
             return
 
-        print "- refresh"
+        #print "- refresh"
         self.lastRefreshed = datetime.now()
         self._refresh_stats()
         if self.lastRefreshed > self.domainsLastReloaded + self.domainsReloadPeriod:
@@ -48,7 +55,24 @@ class Catcher:
             self._check_domains()
 
     def _refresh_stats(self):
-        stats = Config(self.config['statsFilePath'])
+        if not self.stats:
+            self.stats = Config(self.config['statsFilePath'], False)
+        else:
+            self.stats.load(False)
+
+        if not self.stats.lock():
+            return
+
+        for domain, data in self.domains.items():
+            self.stats[domain] = self._merge_domain(self.stats.get(domain, {}), data)
+            data['count'] = 0
+
+        self.stats.save()
+
+    def _merge_domain(self, stat, data):
+        res = dict(data)
+        res['count'] = stat.get('count', 0) + data.get('count', 0)
+        return res
 
     def _reload_domains(self):
         alldoms = Config(self.config['domainsFilePath'])
@@ -65,15 +89,14 @@ class Catcher:
 
         for domain in self.domains.keys():
             if not domain in alldoms or 'disabled' in alldoms[domain]:
-                del self.domains[domain]
+                self.domains[domain]['disabled'] = True
 
         self.random = Random(self.domains)
-        pprint(self.domains)
-        print "! DOMAINS RELOADED"
+        #print "! DOMAINS RELOADED"
         self.domainsLastReloaded = datetime.now()
         self.domainsReloadPeriod = timedelta(**self.config['domainsReloadPeriod'])
 
     def _check_domains(self):
         self.domainsLastChecked = datetime.now()
         self.domainsCheckPeriod = timedelta(**self.config['domainsCheckPeriod'])
-        print "! DOMAINS CHECKED"
+        #print "! DOMAINS CHECKED"
