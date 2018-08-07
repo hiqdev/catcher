@@ -7,6 +7,12 @@ from catcher.Catcher import Catcher
 args = Args()
 config = Config(args.get('path'))
 config.merge(args)
-
 catcher = Catcher(config)
-catcher.run()
+
+command = args.get('command')
+method = getattr(catcher, command, None)
+
+if callable(method):
+    method()
+else:
+    print 'Wrong command: ' + command
