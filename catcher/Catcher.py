@@ -13,8 +13,8 @@ from heppy.Daemon import Daemon
 class Catcher:
     def __init__(self, config):
         self.config = config
-        self.period = timedelta(**config['mainRefreshPeriod'])
-        self.refreshed = datetime.now()
+        self.refreshPeriod = timedelta(**config['mainRefreshPeriod'])
+        self.lastRefreshed = datetime.now()
         self.domains = {}
 
     def dump(self):
@@ -25,11 +25,8 @@ class Catcher:
         print "START"
         self.reload_domains()
         self.check_domains()
-
-    def run(self):
         #self.daemon = Daemon(config)
         #self.daemon.start()
-        print "STARTED"
         self.loop()
 
     def loop(self):
@@ -39,15 +36,19 @@ class Catcher:
             self.refresh()
 
     def refresh(self):
-        if datetime.now() < self.refreshed + self.period:
+        if datetime.now() < self.lastRefreshed + self.refreshPeriod:
             return
 
         print "- refresh"
-        self.refreshed = datetime.now()
-        if self.refreshed > self.domainsLastReloaded + self.domainsReloadPeriod:
+        self.lastRefreshed = datetime.now()
+        self.refresh_stats()
+        if self.lastRefreshed > self.domainsLastReloaded + self.domainsReloadPeriod:
             self.reload_domains()
-        if self.refreshed > self.domainsLastChecked + self.domainsCheckPeriod:
+        if self.lastRefreshed > self.domainsLastChecked + self.domainsCheckPeriod:
             self.check_domains()
+
+    def refresh_stats(self):
+        stats = Config(self.config['statsFilePath'])
 
     def reload_domains(self):
         alldoms = Config(self.config['domainsFilePath'])
