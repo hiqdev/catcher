@@ -1,0 +1,12 @@
+[Unit]
+Description=Catcher %i
+StopWhenUnneeded=true
+
+[Service]
+ExecStart=/home/user/prj/vendor/my-catcher/bin/catcher %i start
+Restart=always
+User=catcher
+Group=catcher
+
+[Install]
+WantedBy=catcher.target

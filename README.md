@@ -6,9 +6,19 @@
 
 ## Use
 
+To start single catcher:
+
 ```sh
 ./bin/catcher config.json start
 ```
+
+To start and keep running desired number of catchers use [systemd] or [docker].
+
+[systemd]: http://0pointer.de/blog/projects/systemd-docs.html
+[docker]: https://docker.com/
+
+Here are recommended [systemd configuration files](etc/systemd).
+
 
 ## Main Configuration File
 
@@ -61,8 +71,10 @@
 
 - Reads main configuration file
 - Reads domain list file (rereads periodically)
+- Established **single** EPP connection
 - Sends as many `domain:register` commands as possible
 - Periodically checks domains list to mark already registered domains
+- Exits after configured period of time (set it to maximum allowed time for EPP connection)
 
 ## License
 
