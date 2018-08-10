@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import os
+import sys
 import time
 
 from datetime import timedelta
@@ -16,6 +18,8 @@ class Catcher:
         self.config = config
         self.refreshPeriod = timedelta(**config['mainRefreshPeriod'])
         self.lastRefreshed = datetime.now()
+        self.name = config.get('name', config['epp']['host'])
+        self.num = config['catchersNum']
         self.domains = {}
         self.stats = None
 
@@ -31,6 +35,76 @@ class Catcher:
         #self.daemon.start()
         self._loop()
 
+    def systemd(self):
+        name = sys.argv[3]
+        func = 'systemd_' + name
+        if hasattr(self, func):
+            getattr(self, func)()
+        else:
+            self.systemd_runcmd(name)
+
+    def systemd_up(self):
+        self.systemd_setup()
+        self.systemd_runcmd('enable')
+        self.systemd_runcmd('start')
+
+    def systemd_down(self):
+        self.systemd_setup()
+        self.systemd_runcmd('stop')
+        self.systemd_runcmd('disable')
+
+    def systemd_status(self):
+        self.systemd_unsafe('status')
+
+    def systemd_runcmd(self, command):
+        for i in range(self.num):
+            self.runcmd('systemctl %s %s' % (command, self.systemd_service_name(i)))
+
+    def systemd_unsafe(self, command):
+        for i in range(self.num):
+            self.unsafe('systemctl %s %s' % (command, self.systemd_service_name(i)))
+
+    def runcmd(self, command):
+        ret = self.unsafe(command)
+        if ret:
+            raise Exception('failed ' + command)
+
+    def unsafe(self, command):
+        print command
+        return os.system(command)
+
+    def systemd_setup(self):
+        with open(self.systemd_service_path(), 'w') as file:
+            file.write(self.systemd_service_config())
+
+    def systemd_service_path(self):
+        return '/etc/systemd/system/' + self.systemd_service_name()
+
+    def systemd_service_name(self, no = ''):
+        return 'catcher-%s@%s.service' % (self.name, no)
+
+    def systemd_service_config(self):
+        return '''\
+[Unit]
+Description=Catcher {name} %i
+StopWhenUnneeded=true
+
+[Service]
+WorkingDirectory={work_dir}
+ExecStart={bin_path} {config_path} start
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+'''.format(
+            name=self.name,
+            work_dir=os.path.dirname(os.path.dirname(self.config.bin_path)),
+            bin_path=self.config.bin_path,
+            config_path=self.config.abs_path
+        )
+
     def _loop(self):
         while True:
             time.sleep(0.5)
@@ -39,7 +113,7 @@ class Catcher:
                 self.domains[domain]['count'] += 1
             else:
                 self.domains[domain]['count'] = 1
-            #print '  %d %s' % (self.domains[domain]['count'], domain)
+            print '  %d %s' % (self.domains[domain]['count'], domain)
             self._refresh()
 
     def _refresh(self):
@@ -56,7 +130,7 @@ class Catcher:
 
     def _refresh_stats(self):
         if not self.stats:
-            self.stats = Config(self.config['statsFilePath'], False)
+            self.stats = Config(self.config.get_path('statsFilePath'), False)
         else:
             self.stats.load(False)
 
@@ -75,7 +149,7 @@ class Catcher:
         return res
 
     def _reload_domains(self):
-        alldoms = Config(self.config['domainsFilePath'])
+        alldoms = Config(self.config.get_path('domainsFilePath'))
 
         for domain in alldoms:
             since = datetime.strptime(alldoms[domain]['since'], '%Y-%m-%d %H:%M:%S')
