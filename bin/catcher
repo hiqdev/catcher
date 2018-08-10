@@ -1,5 +1,12 @@
 #!/usr/bin/python -u
 
+import os
+import sys
+path = os.path.realpath(os.path.abspath(__file__))
+dir = os.path.dirname(os.path.dirname(os.path.dirname(path)))
+sys.path.append(os.path.join(dir, 'catcher'))
+sys.path.append(os.path.join(dir, 'heppy'))
+
 from heppy.Args import Args
 from heppy.Config import Config
 from catcher.Catcher import Catcher
