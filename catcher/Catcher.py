@@ -7,8 +7,6 @@ import time
 from datetime import timedelta
 from datetime import datetime
 
-from pprint import pprint
-
 from catcher.Random import Random
 from heppy.Config import Config
 from heppy.Daemon import Daemon
@@ -16,16 +14,12 @@ from heppy.Daemon import Daemon
 class Catcher:
     def __init__(self, config):
         self.config = config
-        self.refreshPeriod = timedelta(**config['mainRefreshPeriod'])
-        self.lastRefreshed = datetime.now()
         self.name = config.get('name', config['epp']['host'])
         self.num = config['catchersNum']
         self.domains = {}
-        self.stats = None
 
     def dump(self):
-        print "DUMP"
-        pprint(self.config)
+        print self.config
 
     def start(self):
         print "START"
@@ -117,8 +111,17 @@ WantedBy=multi-user.target
             self._refresh()
 
     def _refresh(self):
-        if datetime.now() < self.lastRefreshed + self.refreshPeriod:
+        if not hasattr(self, 'lastRefreshed'):
+            self.refreshPeriod = timedelta(**self.config['refreshPeriod'])
+            self.lastRefreshed = datetime.now()
+        elif datetime.now() < self.lastRefreshed + self.refreshPeriod:
             return
+
+        if not hasattr(self, 'lastRestarted'):
+            self.restartPeriod = timedelta(**self.config['restartPeriod'])
+            self.lastRestarted = datetime.now()
+        elif datetime.now() > self.lastRestarted + self.restartPeriod:
+            sys.exit()
 
         #print "- refresh"
         self.lastRefreshed = datetime.now()
@@ -129,7 +132,7 @@ WantedBy=multi-user.target
             self._check_domains()
 
     def _refresh_stats(self):
-        if not self.stats:
+        if not hasattr(self, 'stats'):
             self.stats = Config(self.config.get_path('statsFilePath'), False)
         else:
             self.stats.load(False)
